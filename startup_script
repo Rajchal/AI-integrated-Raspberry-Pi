@@ -1,0 +1,43 @@
+#!/bin/bash
+LOG_FILE="/home/carpediem/startup_log.txt"
+# Write timestamp at start
+echo "----- Startup at $(date '+%Y-%m-%d %H:%M:%S') -----" >> "$LOG_FILE"
+echo "🚀 Starting setup..." >> "$LOG_FILE"
+# Activate Python virtual environment
+echo "🐍 Activating Python virtual environment..." >> "$LOG_FILE"
+source /home/carpediem/rpi_flask_api/venv/bin/activate
+# Ensure Python and pip from venv
+PYTHON_BIN="/home/carpediem/rpi_flask_api/venv/bin/python3"
+PIP_BIN="/home/carpediem/rpi_flask_api/venv/bin/pip"
+echo "📦 Ensuring required Python packages are installed..." >> "$LOG_FILE"
+pip3 install -r /home/carpediem/rpi_flask_api/requirements.txt >> "$LOG_FILE" 2>&1
+# Start Ollama model in background
+echo "⚙️ Starting the Ollama model (phi3:mini)..." >> "$LOG_FILE"
+ollama run phi3:mini >> "$LOG_FILE" 2>&1 &
+OLLAMA_PID=$!
+echo "⏳ Waiting 15 seconds for Ollama to initialize..." >> "$LOG_FILE"
+sleep 15
+# Start Flask API in background
+echo "🌐 Starting Flask API..." >> "$LOG_FILE"
+cd /home/carpediem/rpi_flask_api
+python app.py >> "$LOG_FILE" 2>&1 &
+FLASK_PID=$!
+echo "⏳ Waiting 10 seconds for Flask API to start..." >> "$LOG_FILE"
+# Wait until Flask API is listening on port 5000 or timeout after 30s
+timeout=30
+elapsed=0
+while ! nc -z localhost 5000; do
+  sleep 1
+  elapsed=$((elapsed + 1))
+  if [ $elapsed -ge $timeout ]; then
+    echo "Error: Flask API did not start listening on port 5000 after $timeout seconds." >> "$LOG_FILE"
+    exit 1
+  fi
+done
+echo "Flask API is up on port 5000" >> "$LOG_FILE"
+# Run user interaction script (this will block until input)
+#echo "💬 Running ask_user_script.sh for user interaction..." >> "$LOG_FILE"
+#bash /home/carpediem/ask_user_script.sh >> "$LOG_FILE" 2>&1
+# Write timestamp at end
+echo "----- Finished at $(date '+%Y-%m-%d %H:%M:%S') -----" >> "$LOG_FILE"
+

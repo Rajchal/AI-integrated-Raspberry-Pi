@@ -1,0 +1,17 @@
+#!/bin/bash
+echo "📥 Let's personalize your session!"
+read -p "Enter user ID: " USER_ID
+read -p "Enter intellect level (low / normal / high): " INTELLECT
+read -p "Ask a question: " QUESTION
+echo "🧠 Sending user info to API..."
+curl -X PUT http://localhost:5000/user/$USER_ID \
+  -H "Content-Type: application/json" \
+  -d "{\"intellect\": \"$INTELLECT\"}"
+echo ""
+echo "❓ Asking your question..."
+curl -X POST http://localhost:5000/ask \
+  -H "Content-Type: application/json" \
+  -d "{\"user_id\": \"$USER_ID\", \"question\": \"$QUESTION\"}"
+echo ""
+echo "✅ Done!" a
+
