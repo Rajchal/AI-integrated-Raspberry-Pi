@@ -79,8 +79,9 @@ def set_user_intellect(user_id):
     intellect = data.get('intellect', 'high').lower()
     if intellect not in {'low', 'normal', 'high'}:
         return jsonify({'error': 'Intellect must be "low", "normal", or "high".'}), 400
-    users[user_id] = {'intellect': intellect}
-    save_users(users)
+    current_users = load_users()
+    current_users[user_id] = {'intellect': intellect}
+    save_users(current_users)
     return jsonify({'user_id': user_id, 'intellect': intellect})
 
 if __name__ == '__main__':
