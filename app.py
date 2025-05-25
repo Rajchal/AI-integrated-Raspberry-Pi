@@ -76,7 +76,7 @@ def ask_question():
 @app.route('/user/<user_id>', methods=['PUT'])
 def set_user_intellect(user_id):
     data = request.get_json(force=True, silent=True) or {}
-    intellect = data.get('intellect', 'normal').lower()
+    intellect = data.get('intellect', 'high').lower()
     if intellect not in {'low', 'normal', 'high'}:
         return jsonify({'error': 'Intellect must be "low", "normal", or "high".'}), 400
     users[user_id] = {'intellect': intellect}
