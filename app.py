@@ -60,7 +60,7 @@ def ask_question():
                 "num_predict": 50,  # shorter, faster
                 "stream": False
             },
-            timeout=30  # shorter timeout
+            timeout=60  # longer timeout
         )
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
@@ -83,6 +83,21 @@ def set_user_intellect(user_id):
     current_users[user_id] = {'intellect': intellect}
     save_users(current_users)
     return jsonify({'user_id': user_id, 'intellect': intellect})
+
+# function to give prompt based on user intellect
+def generate_ai_prompts(students):
+    prompts = {}
+    for student, subjects in students.items():
+        prompts[student] = {}
+        for subject, data in subjects.items():
+            level, age_group = calculate_level(data)
+            prompt = f"Generate 5 {level} questions in {subject} for a {age_group} student."
+            prompts[student][subject] = {
+                "level": level,
+                "prompt": prompt
+            }
+    return prompts
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=FLASK_PORT, debug=False)
