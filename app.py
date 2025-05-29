@@ -98,6 +98,19 @@ def generate_ai_prompts(students):
             }
     return prompts
 
+def calculate_level(subject_data):
+    accuracy = subject_data['correct'] / subject_data['total']
+    avg_time = subject_data['avg_time']
+
+    if accuracy < 0.4 or avg_time > 20:
+        return "Beginner", "5-year-old"
+    elif 0.4 <= accuracy < 0.6:
+        return "Intermediate", "10-year-old"
+    elif 0.6 <= accuracy < 0.8:
+        return "Advanced", "14-year-old"
+    else:
+        return "Expert", "18-year-old"
+    
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=FLASK_PORT, debug=False)
