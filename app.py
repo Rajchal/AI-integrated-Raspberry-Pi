@@ -76,9 +76,8 @@ def set_user_intellect(user_id):
     intellect = data.get('intellect', 'high').lower()
     if intellect not in {'low', 'normal', 'high'}:
         return jsonify({'error': 'Intellect must be "low", "normal", or "high".'}), 400
-    current_users = load_users()
-    current_users[user_id] = {'intellect': intellect}
-    save_users(current_users)
+    users[user_id] = {'intellect': intellect}
+    save_users(users)
     return jsonify({'user_id': user_id, 'intellect': intellect})
 
 # function to give prompt based on user intellect
