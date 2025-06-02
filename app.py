@@ -1,6 +1,7 @@
 import os
 from flask import Flask, request, jsonify
 import requests
+import json
 
 # Environment vars
 OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
@@ -10,8 +11,22 @@ FLASK_PORT = int(os.getenv('FLASK_PORT', 3000))
 
 app = Flask(__name__)
 
-# In-memory storage (only)
-users = {}
+USERS_FILE = 'users.json'
+
+def load_users():
+    if os.path.exists(USERS_FILE):
+        with open(USERS_FILE, 'r') as f:
+            try:
+                return json.load(f)
+            except Exception:
+                return {}
+    return {}
+
+def save_users(users):
+    with open(USERS_FILE, 'w') as f:
+        json.dump(users, f)
+
+users = load_users()
 
 @app.route('/')
 def index():
@@ -29,7 +44,10 @@ def ask_question():
     intellect = user.get('intellect', 'normal')
 
     # Short prompt based on intellect only
-    instruction = generate_ai_prompts(users)
+    instruction = {
+        'high': "Explain in detail like i have a very high iq:",
+        'low': "Explain simply like i am 10 yrs old:",
+    }.get(intellect, "Answer this normal as i am an average kid:")
 
     prompt = f"{instruction} {question}"
 
@@ -42,7 +60,7 @@ def ask_question():
                 "num_predict": 50,  # shorter, faster
                 "stream": False
             },
-            timeout=99  # longer timeout
+            timeout=30  # shorter timeout
         )
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
@@ -61,36 +79,10 @@ def set_user_intellect(user_id):
     intellect = data.get('intellect', 'high').lower()
     if intellect not in {'low', 'normal', 'high'}:
         return jsonify({'error': 'Intellect must be "low", "normal", or "high".'}), 400
-    users[user_id] = {'intellect': intellect}
+    current_users = load_users()
+    current_users[user_id] = {'intellect': intellect}
+    save_users(current_users)
     return jsonify({'user_id': user_id, 'intellect': intellect})
-
-# function to give prompt based on user intellect
-def generate_ai_prompts(students):
-    prompts = {}
-    for student, subjects in students.items():
-        prompts[student] = {}
-        for subject, data in subjects.items():
-            level, age_group = calculate_level(data)
-            prompt = f"Generate 5 {level} questions in {subject} for a {age_group} student."
-            prompts[student][subject] = {
-                "level": level,
-                "prompt": prompt
-            }
-    return prompts
-
-def calculate_level(subject_data):
-    accuracy = subject_data['correct'] / subject_data['total']
-    avg_time = subject_data['avg_time']
-
-    if accuracy < 0.4 or avg_time > 20:
-        return "Beginner", "5-year-old"
-    elif 0.4 <= accuracy < 0.6:
-        return "Intermediate", "10-year-old"
-    elif 0.6 <= accuracy < 0.8:
-        return "Advanced", "14-year-old"
-    else:
-        return "Expert", "18-year-old"
-    
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=FLASK_PORT, debug=False)
