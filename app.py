@@ -5,7 +5,7 @@ import json
 
 # Environment vars
 OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
-OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'qwen:0.5b')
+OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'qwen3:0.6b')
 FLASK_PORT = int(os.getenv('FLASK_PORT', 3000))
 
 
@@ -60,7 +60,7 @@ def ask_question():
                 "num_predict": 50,  # shorter, faster
                 "stream": False
             },
-            timeout=30  # shorter timeout
+            timeout=90  # shorter timeout
         )
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
