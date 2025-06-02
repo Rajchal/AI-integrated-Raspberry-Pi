@@ -57,7 +57,7 @@ def ask_question():
                 "num_predict": 50,  # shorter, faster
                 "stream": False
             },
-            timeout=60  # longer timeout
+            timeout=120  # longer timeout
         )
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
