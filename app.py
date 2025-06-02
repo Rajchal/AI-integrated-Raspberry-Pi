@@ -1,32 +1,17 @@
 import os
 from flask import Flask, request, jsonify
 import requests
-import json
 
 # Environment vars
 OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
-OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'qwen3:0.6b')
+OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'qwen:0.5b')
 FLASK_PORT = int(os.getenv('FLASK_PORT', 3000))
 
 
 app = Flask(__name__)
 
-USERS_FILE = 'users.json'
-
-def load_users():
-    if os.path.exists(USERS_FILE):
-        with open(USERS_FILE, 'r') as f:
-            try:
-                return json.load(f)
-            except Exception:
-                return {}
-    return {}
-
-def save_users(users):
-    with open(USERS_FILE, 'w') as f:
-        json.dump(users, f)
-
-users = load_users()
+# In-memory storage (only)
+users = {}
 
 @app.route('/')
 def index():
@@ -77,7 +62,6 @@ def set_user_intellect(user_id):
     if intellect not in {'low', 'normal', 'high'}:
         return jsonify({'error': 'Intellect must be "low", "normal", or "high".'}), 400
     users[user_id] = {'intellect': intellect}
-    save_users(users)
     return jsonify({'user_id': user_id, 'intellect': intellect})
 
 # function to give prompt based on user intellect
