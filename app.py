@@ -5,7 +5,7 @@ import json
 
 # Environment vars
 OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
-OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'qwen:0.5b')
+OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'qwen3:0.6b')
 FLASK_PORT = int(os.getenv('FLASK_PORT', 3000))
 
 
@@ -44,10 +44,7 @@ def ask_question():
     intellect = user.get('intellect', 'normal')
 
     # Short prompt based on intellect only
-    instruction = {
-        'high': "Explain in detail like i have a very high iq:",
-        'low': "Explain simply like i am 10 yrs old:",
-    }.get(intellect, "Answer this normal as i am an average kid:")
+    instruction = generate_ai_prompts(users)
 
     prompt = f"{instruction} {question}"
 
