@@ -49,7 +49,7 @@ def ask_question():
         'low': "Explain simply like i am 10 yrs old:",
     }.get(intellect, "Answer this normal as i am an average kid:")
 
-    prompt = f"{instruction} {question}"
+    prompt = f"/no_think {instruction} {question}"
 
     try:
         response = requests.post(
