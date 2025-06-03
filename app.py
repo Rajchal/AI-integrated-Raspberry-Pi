@@ -37,6 +37,7 @@ def ask_question():
     data = request.get_json(force=True, silent=True) or {}
     user_id = data.get('user_id')
     question = data.get('question')
+    think_bool= data.get('think', False)
     if not user_id or not question:
         return jsonify({'error': 'user_id and question are required'}), 400
 
@@ -48,8 +49,10 @@ def ask_question():
         'high': "Explain in detail like i have a very high iq:",
         'low': "Explain simply like i am 10 yrs old:",
     }.get(intellect, "Answer this normal as i am an average kid:")
-
-    prompt = f"/no_think {instruction} {question}"
+    if think_bool:
+        prompt = f"{instruction} {question}"
+    else:
+        prompt = f"/no_think {instruction} {question}"
 
     try:
         response = requests.post(
