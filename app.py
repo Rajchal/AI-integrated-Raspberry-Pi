@@ -11,7 +11,7 @@ FLASK_PORT = int(os.getenv('FLASK_PORT', 3000))
 
 app = Flask(__name__)
 
-
+classification = 'average'  # Default classification
 
 @app.route('/')
 def index():
@@ -47,7 +47,7 @@ def ask_question():
         '0-10': 'critical'
     }
     # Short prompt based on classification only
-    intellect = classification
+    intellect = classes.get(classification, 'average')
     instruction = {
         'gifted': "Explain in detail like i have a very high iq:",
         'excellent': "Explain in detail like i have a high iq:",
