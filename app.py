@@ -11,16 +11,6 @@ FLASK_PORT = int(os.getenv('FLASK_PORT', 3000))
 
 app = Flask(__name__)
 
-USERS_FILE = 'users.json'
-
-def load_users():
-    if os.path.exists(USERS_FILE):
-        with open(USERS_FILE, 'r') as f:
-            try:
-                return json.load(f)
-            except Exception:
-                return {}
-    return {}
 
 def save_users(users):
     with open(USERS_FILE, 'w') as f:
@@ -40,14 +30,40 @@ def ask_question():
     think_bool= data.get('think', False)
     if not user_id or not question:
         return jsonify({'error': 'user_id and question are required'}), 400
+    try:
+        perf_resp = requests.get(f'http://192.168.4.1/student-performance/{user_id}', timeout=5)
+        perf_resp.raise_for_status()
+        perf_data = perf_resp.json()
+        if 'classification' in perf_data:
+            classification = perf_data['classification']
+    except Exception:
+        pass
 
-    user = users.get(user_id, {'intellect': 'normal'})
-    intellect = user.get('intellect', 'normal')
-
-    # Short prompt based on intellect only
+    classes = {
+        '90-100': 'gifted',
+        '80-90': 'excellent',
+        '70-80': 'good',
+        '60-70': 'above average',
+        '50-60': 'below average',
+        '40-50': 'struggling',
+        '30-40': 'needs improvement',
+        '20-30': 'significantly behind',
+        '10-20': 'severely behind',
+        '0-10': 'critical'
+    }
+    # Short prompt based on classification only
+    intellect = classes.get(classification, 'average')
     instruction = {
-        'high': "Explain in detail like i have a very high iq:",
-        'low': "Explain simply like i am 10 yrs old:",
+        'gifted': "Explain in detail like i have a very high iq:",
+        'excellent': "Explain in detail like i have a high iq:",
+        'good': "Explain in detail like i have an average iq:",
+        'above average': "Explain simply like i am 10 yrs old:",
+        'below average': "Explain simply like i am 10 yrs old:",
+        'struggling': "Explain simply like i am 10 yrs old:",
+        'needs improvement': "Explain simply like i am 10 yrs old:",
+        'significantly behind': "Explain simply like i am 10 yrs old:",
+        'severely behind': "Explain simply like i am 10 yrs old:",
+        'critical': "Explain simply like i am 10 yrs old:",
     }.get(intellect, "Answer this normal as i am an average kid:")
     if think_bool:
         prompt = f"{instruction} {question}"
@@ -76,16 +92,7 @@ def ask_question():
         'answer': answer
     })
 
-@app.route('/user/<user_id>', methods=['PUT'])
-def set_user_intellect(user_id):
-    data = request.get_json(force=True, silent=True) or {}
-    intellect = data.get('intellect', 'high').lower()
-    if intellect not in {'low', 'normal', 'high'}:
-        return jsonify({'error': 'Intellect must be "low", "normal", or "high".'}), 400
-    current_users = load_users()
-    current_users[user_id] = {'intellect': intellect}
-    save_users(current_users)
-    return jsonify({'user_id': user_id, 'intellect': intellect})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=FLASK_PORT, debug=False)
