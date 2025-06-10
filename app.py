@@ -19,6 +19,7 @@ def index():
 
 @app.route('/ask', methods=['POST'])
 def ask_question():
+    global classification
     data = request.get_json(force=True, silent=True) or {}
     user_id = data.get('user_id')
     question = data.get('question')
