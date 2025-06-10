@@ -85,7 +85,7 @@ def ask_question():
     return jsonify({
         'user_id': user_id,
         'question': question,
-        'answer': answer
+        'answer': answer+ f" (Classification: {classification})",
     })
 
 
