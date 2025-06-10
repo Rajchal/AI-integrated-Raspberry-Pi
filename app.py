@@ -26,6 +26,7 @@ def ask_question():
     think_bool= data.get('think', False)
     if not user_id or not question:
         return jsonify({'error': 'user_id and question are required'}), 400
+    print(f"Received question from user {user_id}: {question}")
     try:
         perf_resp = requests.get(f'http://192.168.4.1/student-performance/{user_id}', timeout=5)
         perf_resp.raise_for_status()
