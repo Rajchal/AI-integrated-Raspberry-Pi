@@ -47,7 +47,7 @@ def ask_question():
         '0-10': 'critical'
     }
     # Short prompt based on classification only
-    intellect = classes.get(classification, 'average')
+    intellect = classification
     instruction = {
         'gifted': "Explain in detail like i have a very high iq:",
         'excellent': "Explain in detail like i have a high iq:",
