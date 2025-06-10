@@ -35,7 +35,7 @@ def ask_question():
         if 'classification' in perf_data:
             classification = perf_data['classification']
     except Exception:
-        return jsonify({'error': 'Failed to fetch user performance data'}), 500
+        return jsonify({'error': 'Failed to fetch user performance data', 'details': str(e)}), 500
 
     classes = {
         '90-100': 'gifted',
