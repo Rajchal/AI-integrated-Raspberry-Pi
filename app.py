@@ -12,11 +12,6 @@ FLASK_PORT = int(os.getenv('FLASK_PORT', 3000))
 app = Flask(__name__)
 
 
-def save_users(users):
-    with open(USERS_FILE, 'w') as f:
-        json.dump(users, f)
-
-users = load_users()
 
 @app.route('/')
 def index():
