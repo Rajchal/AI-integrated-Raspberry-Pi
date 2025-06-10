@@ -30,6 +30,7 @@ def ask_question():
         perf_resp = requests.get(f'http://192.168.4.1/student-performance/{user_id}', timeout=5)
         perf_resp.raise_for_status()
         perf_data = perf_resp.json()
+        print(perf_data)
         if 'classification' in perf_data:
             classification = perf_data['classification']
     except Exception:
